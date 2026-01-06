@@ -1,28 +1,28 @@
 class Kql < Formula
   desc "CLI toolkit for Kusto Query Language (KQL) and Azure Data Explorer"
   homepage "https://github.com/cloudygreybeard/kql"
-  version "0.4.1"
+  version "0.4.2"
   license "Apache-2.0"
 
   on_macos do
     on_intel do
       url "https://github.com/cloudygreybeard/kql/releases/download/v#{version}/kql_#{version}_darwin_amd64.tar.gz"
-      sha256 "1ee8c30377dc65949578d9c0d648070732d55744d1c11639e3b17a14a88029b8"
+      sha256 "dd50a198d07181a05c63a4d46e4bd634739de1e370a2fbe724a24c3f01ea0afe"
     end
     on_arm do
       url "https://github.com/cloudygreybeard/kql/releases/download/v#{version}/kql_#{version}_darwin_arm64.tar.gz"
-      sha256 "43edd6aeaae3278e764459abfe9f2fb3d9e413580250ab43ec0721adaaeb40de"
+      sha256 "a2802d51abe18536a496dd98b7e3dfa672efc6c4a03c7861875b1d5d67c9a78e"
     end
   end
 
   on_linux do
     on_intel do
       url "https://github.com/cloudygreybeard/kql/releases/download/v#{version}/kql_#{version}_linux_amd64.tar.gz"
-      sha256 "aeae916aead6dcb89c2f488978983011bca095ee4118bb922787c78a06385ba1"
+      sha256 "c2a9a4ed847a75f1451b8c2082c9a8115ae8693369f5b5f2442760cee3577808"
     end
     on_arm do
       url "https://github.com/cloudygreybeard/kql/releases/download/v#{version}/kql_#{version}_linux_arm64.tar.gz"
-      sha256 "d386ec951d35aa54aaf14973adfe6b52d3202f910ffb8191221228b904c03aff"
+      sha256 "d07f7457099e464d959e056da9c02981a2288fe08651c1c95fc40b4aa4233acd"
     end
   end
 
