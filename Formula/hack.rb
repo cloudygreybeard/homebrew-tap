@@ -1,28 +1,28 @@
 class Hack < Formula
   desc "CLI tool for managing hack workspaces with pattern-based scaffolding"
   homepage "https://github.com/cloudygreybeard/hack"
-  version "0.3.1"
+  version "0.3.2"
   license "Apache-2.0"
 
   on_macos do
     on_intel do
       url "https://github.com/cloudygreybeard/hack/releases/download/v#{version}/hack_#{version}_darwin_amd64.tar.gz"
-      sha256 "871234ad11d87fdb9f2862ac9c0d946b6e62638977c48e1049d3d06d480bc665"
+      sha256 "dedbd9910c924e1b78767b12b1e3828d8ff262703dc426798ae8393c2f32da50"
     end
     on_arm do
       url "https://github.com/cloudygreybeard/hack/releases/download/v#{version}/hack_#{version}_darwin_arm64.tar.gz"
-      sha256 "6e077f24b3bb9e610c3ed1a11ea3f63a501f78accaa19939d486dbf11a7fe016"
+      sha256 "4ce7e714e3b318072effdb03e132e90e3b7693896ba5cf3bc561cf72a9c57d52"
     end
   end
 
   on_linux do
     on_intel do
       url "https://github.com/cloudygreybeard/hack/releases/download/v#{version}/hack_#{version}_linux_amd64.tar.gz"
-      sha256 "70228acdbfc9e6ce73b4a6aa67bcdcb40531b16f298421a544ec3b42e09697d8"
+      sha256 "03bca822e6d120095105baab71dda1cb474d59541a17cdf87e8141a2ed373a69"
     end
     on_arm do
       url "https://github.com/cloudygreybeard/hack/releases/download/v#{version}/hack_#{version}_linux_arm64.tar.gz"
-      sha256 "41165603c6b4c5bd8b0f26772c7e76eec7fd483861bff917281c0bdf27d9b049"
+      sha256 "3661b7041d2883c393aed392bae45e687e2be44db95384132a8b9f36bb842135"
     end
   end
 
