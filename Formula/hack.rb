@@ -7,22 +7,22 @@ class Hack < Formula
   on_macos do
     on_intel do
       url "https://github.com/cloudygreybeard/hack/releases/download/v#{version}/hack_#{version}_darwin_amd64.tar.gz"
-      sha256 "d9b706d041404796c4b14989344cc78d0fd28ee67d36fff0097f34befe1ea466"
+      sha256 "67152f7200c5168d0b80606c935f83f761fdf47799c8ed3a4956499ec1f1a0b9"
     end
     on_arm do
       url "https://github.com/cloudygreybeard/hack/releases/download/v#{version}/hack_#{version}_darwin_arm64.tar.gz"
-      sha256 "9d71050ef585769973061d0ba6180f7740f5797da248a097702e6965d610006d"
+      sha256 "1baf0aa05f3cf2d76ad094101fad575d5fe5ab672142474730bbda0d8928e4a0"
     end
   end
 
   on_linux do
     on_intel do
       url "https://github.com/cloudygreybeard/hack/releases/download/v#{version}/hack_#{version}_linux_amd64.tar.gz"
-      sha256 "c1e6c8874d6609469d8f6abd250aa896db90d0a06c5e33c932c48ab3c33f08a8"
+      sha256 "a1306e11256f4ca1ca04ec2e7aa646ca2d7bfbd36306d8248d986378cf4cd5d3"
     end
     on_arm do
       url "https://github.com/cloudygreybeard/hack/releases/download/v#{version}/hack_#{version}_linux_arm64.tar.gz"
-      sha256 "2bbc876305f49b18fc9b3886cfba974e23e3a66c5a654c9de6881b5a8ba47a57"
+      sha256 "95336593623196c724a90bffa1d9854786af6b91a45989446a85be648ffbcb14"
     end
   end
 
