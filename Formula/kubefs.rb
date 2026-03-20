@@ -7,22 +7,22 @@ class Kubefs < Formula
   on_macos do
     on_intel do
       url "https://github.com/cloudygreybeard/kubefs/releases/download/v#{version}/kubefs_#{version}_darwin_amd64.tar.gz"
-      sha256 "d53cb3fbd4b5226ee2a07b5a9405ed8065bae8382191bcbf560ff225396a9c24"
+      sha256 "284fb386e42982c64b751c35adda86f98bfdab41c4656f064e57a59db27d055a"
     end
     on_arm do
       url "https://github.com/cloudygreybeard/kubefs/releases/download/v#{version}/kubefs_#{version}_darwin_arm64.tar.gz"
-      sha256 "2fdb38353c61e38d5a0ada7edb16c1bffdf677056b346cd9ee50d1262b67fd7e"
+      sha256 "765ccd283f86b2915e1f1f19c5d78a56d228042a34f16e28783e6985010b8cff"
     end
   end
 
   on_linux do
     on_intel do
       url "https://github.com/cloudygreybeard/kubefs/releases/download/v#{version}/kubefs_#{version}_linux_amd64.tar.gz"
-      sha256 "436ada0d0cda3325c5dd095343b07a440ecbe78c8b7f9298408b31747e149a4e"
+      sha256 "98c80489e185ce823469505f5529793dfe77b8c0cf496ec4b47b2afe1e7cda91"
     end
     on_arm do
       url "https://github.com/cloudygreybeard/kubefs/releases/download/v#{version}/kubefs_#{version}_linux_arm64.tar.gz"
-      sha256 "a974b5675c073b83b88a776d42c2dabe87f4bbd349c5bf416b15d858d71e5360"
+      sha256 "a3a0387d9a0cd022864117d8e65a1902d6d00e15036cd2461aee15064cf74d5a"
     end
   end
 
