@@ -7,22 +7,22 @@ class Jumpgate < Formula
   on_macos do
     on_intel do
       url "https://github.com/cloudygreybeard/jumpgate/releases/download/v#{version}/jumpgate_#{version}_darwin_amd64.tar.gz"
-      sha256 "4436ed7dab8b9cca534cec49287629bfc90909899a24bf0f9fdcc841348ee109"
+      sha256 "abdd8fe677bb25224113b145e03795ab74b32513e7b68b4e90f3217aa8eba103"
     end
     on_arm do
       url "https://github.com/cloudygreybeard/jumpgate/releases/download/v#{version}/jumpgate_#{version}_darwin_arm64.tar.gz"
-      sha256 "94b18ab396cb15965a804e23a7e86b09c20f14097fb7782e3b27bd90c166462f"
+      sha256 "3f1aadbb8d719aa56102611f2c623499c90016a614df93fefb24269428388a32"
     end
   end
 
   on_linux do
     on_intel do
       url "https://github.com/cloudygreybeard/jumpgate/releases/download/v#{version}/jumpgate_#{version}_linux_amd64.tar.gz"
-      sha256 "74ba0e83746cb3c688cf7190b6bd52f6c5c0bc3d48bbb16021ba9c92607d6a7a"
+      sha256 "88bd1cfad55ccb103142fe07f09d897b33d285f20855d5919d05437659f9a75c"
     end
     on_arm do
       url "https://github.com/cloudygreybeard/jumpgate/releases/download/v#{version}/jumpgate_#{version}_linux_arm64.tar.gz"
-      sha256 "55c9b33898ef984368751025f49e43199b4c0746b09d5c55bbdb3ce91ceab00c"
+      sha256 "2167859a59e980c1a0f5e06ca132f3a8dbb142ac35ba12c53eceb0403a75e2cf"
     end
   end
 
