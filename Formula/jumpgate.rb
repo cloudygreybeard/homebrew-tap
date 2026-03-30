@@ -1,28 +1,28 @@
 class Jumpgate < Formula
   desc "SSH relay access manager — multi-hop tunnels via ControlMaster and reverse forwarding"
   homepage "https://github.com/cloudygreybeard/jumpgate"
-  version "0.1.0"
+  version "0.2.0"
   license "Apache-2.0"
 
   on_macos do
     on_intel do
       url "https://github.com/cloudygreybeard/jumpgate/releases/download/v#{version}/jumpgate_#{version}_darwin_amd64.tar.gz"
-      sha256 "e127b0260b6223e6dec64dcffa52fc0e23c5aedf8bb2fad7481cdc24b00c1098"
+      sha256 "f5c650390dbde27b7e63831f60f8810529795dd20fafe97ce010a107dd940165"
     end
     on_arm do
       url "https://github.com/cloudygreybeard/jumpgate/releases/download/v#{version}/jumpgate_#{version}_darwin_arm64.tar.gz"
-      sha256 "ef6f4a4fb39de595399712c43ebfa93a6136364a5834c3c016965f200e2d167a"
+      sha256 "c6cc2f93940cd473552e933679357e37e385de9e6266d45e16deb3de0c1324da"
     end
   end
 
   on_linux do
     on_intel do
       url "https://github.com/cloudygreybeard/jumpgate/releases/download/v#{version}/jumpgate_#{version}_linux_amd64.tar.gz"
-      sha256 "21b148fe1e57aa9755e1a936efa131ada1e47d7f3a85b2689a0f4015b393f6e4"
+      sha256 "d5443a2e56d6ff275068d9240a635e5b64849f32e37b51957f0f012ed4de7162"
     end
     on_arm do
       url "https://github.com/cloudygreybeard/jumpgate/releases/download/v#{version}/jumpgate_#{version}_linux_arm64.tar.gz"
-      sha256 "f83b0a9206831161f015bb6d4056db742ea4ac2051d70be1b2c3cb206c960eea"
+      sha256 "d7a0a6f25701a60cf638713bb981faf8df1d4138a4b7f525ac1e08f0dd30b235"
     end
   end
 
