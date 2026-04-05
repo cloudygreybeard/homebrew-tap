@@ -1,0 +1,235 @@
+# Reusable workflow: release a Homebrew formula after a tagged release.
+#
+# Generates and pushes a formula to the appropriate tap repo.
+# Supports goreleaser (per-platform tar.gz) and binary (single universal)
+# artifact styles, and public or private source repos.
+#
+# The platform matrix is fully parameterised — callers can override it
+# to add or remove OS/arch combinations without modifying this workflow.
+
+name: Release Homebrew Formula
+
+on:
+  workflow_call:
+    inputs:
+      package-name:
+        description: "Package name (used for formula filename and commit messages)"
+        required: true
+        type: string
+      binary-name:
+        description: "Name of the installed binary (may differ from package-name)"
+        required: true
+        type: string
+      formula-class:
+        description: "Ruby class name for the formula (PascalCase, e.g. IaGo, Jumpgate)"
+        required: true
+        type: string
+      formula-desc:
+        description: "One-line description for the formula"
+        required: true
+        type: string
+      artifact-style:
+        description: "'goreleaser' (per-platform tar.gz) or 'binary' (single universal binary)"
+        required: true
+        type: string
+      private:
+        description: "true if the source repo is private (adds download strategy / auth headers)"
+        required: true
+        type: boolean
+      formula-license:
+        description: "SPDX license identifier"
+        required: false
+        type: string
+        default: "Apache-2.0"
+      platforms:
+        description: "JSON array of platform objects: [{os, arch, brew_os, brew_arch}]. Defaults to standard macOS+Linux matrix."
+        required: false
+        type: string
+        default: >-
+          [
+            {"os": "darwin", "arch": "amd64", "brew_os": "on_macos", "brew_arch": "on_intel"},
+            {"os": "darwin", "arch": "arm64", "brew_os": "on_macos", "brew_arch": "on_arm"},
+            {"os": "linux",  "arch": "amd64", "brew_os": "on_linux", "brew_arch": "on_intel"},
+            {"os": "linux",  "arch": "arm64", "brew_os": "on_linux", "brew_arch": "on_arm"}
+          ]
+    secrets:
+      deploy-key:
+        description: "SSH deploy key with write access to the tap repo"
+        required: true
+
+jobs:
+  update-formula:
+    runs-on: ubuntu-latest
+    env:
+      TAP_REPO: ${{ inputs.private && 'cloudygreybeard/homebrew-tap-private' || 'cloudygreybeard/homebrew-tap' }}
+      SOURCE_REPO: ${{ github.repository }}
+      PACKAGE: ${{ inputs.package-name }}
+      BINARY: ${{ inputs.binary-name }}
+      FORMULA_CLASS: ${{ inputs.formula-class }}
+      FORMULA_DESC: ${{ inputs.formula-desc }}
+      LICENSE: ${{ inputs.formula-license }}
+      PRIVATE: ${{ inputs.private }}
+      PLATFORMS: ${{ inputs.platforms }}
+    steps:
+      - name: Checkout tap repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.TAP_REPO }}
+          ssh-key: ${{ secrets.deploy-key }}
+          path: tap
+
+      - name: Get version from tag
+        id: version
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Resolve formula fragments
+        id: fragments
+        run: |
+          if [ "$PRIVATE" = "true" ]; then
+            echo "require_line=require_relative \"../lib/private_strategy\"" >> $GITHUB_OUTPUT
+            EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+            echo "using_clause<<$EOF" >> $GITHUB_OUTPUT
+            echo ',
+                    using: GitHubPrivateRepositoryReleaseDownloadStrategy' >> $GITHUB_OUTPUT
+            echo "$EOF" >> $GITHUB_OUTPUT
+            echo "caveats<<$EOF" >> $GITHUB_OUTPUT
+            cat >> $GITHUB_OUTPUT <<'CAVEATS'
+
+            def caveats
+              <<~EOS
+                This formula requires access to a private GitHub repository.
+                Ensure HOMEBREW_GITHUB_API_TOKEN is set:
+
+                  export HOMEBREW_GITHUB_API_TOKEN=$(gh auth token)
+
+                Or create a dedicated token at https://github.com/settings/tokens with repo scope.
+              EOS
+            end
+          CAVEATS
+            echo "$EOF" >> $GITHUB_OUTPUT
+          else
+            echo "require_line=" >> $GITHUB_OUTPUT
+            echo "using_clause=" >> $GITHUB_OUTPUT
+            echo "caveats=" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+          DOWNLOAD_PATTERN: ${{ inputs.artifact-style == 'goreleaser' && 'checksums.txt' || inputs.binary-name }}
+        run: |
+          MAX_ATTEMPTS=5
+          for attempt in $(seq 1 "$MAX_ATTEMPTS"); do
+            if gh release download "v${VERSION}" --repo "${SOURCE_REPO}" --pattern "${DOWNLOAD_PATTERN}" 2>/dev/null; then
+              echo "Downloaded ${DOWNLOAD_PATTERN} on attempt ${attempt}"
+              break
+            fi
+            if [ "$attempt" -eq "$MAX_ATTEMPTS" ]; then
+              echo "Failed to download ${DOWNLOAD_PATTERN} after ${attempt} attempts" >&2
+              exit 1
+            fi
+            echo "Attempt ${attempt}: release assets not yet available, retrying in ${attempt}s..."
+            sleep "$attempt"
+          done
+
+      - name: "goreleaser: build URL block"
+        if: inputs.artifact-style == 'goreleaser'
+        id: goreleaser
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          USING_CLAUSE: ${{ steps.fragments.outputs.using_clause }}
+        run: |
+          BLOCK=""
+
+          for brew_os in $(echo "$PLATFORMS" | jq -r '.[].brew_os' | awk '!seen[$0]++'); do
+            BLOCK+=$'\n'"    ${brew_os} do"
+
+            while read -r platform; do
+              os=$(echo "$platform" | jq -r '.os')
+              arch=$(echo "$platform" | jq -r '.arch')
+              brew_arch=$(echo "$platform" | jq -r '.brew_arch')
+              sha=$(grep "${PACKAGE}_${VERSION}_${os}_${arch}.tar.gz" checksums.txt | awk '{print $1}')
+
+              BLOCK+=$'\n'"      ${brew_arch} do"
+              BLOCK+=$'\n'"        url \"https://github.com/${SOURCE_REPO}/releases/download/v#{version}/${PACKAGE}_#{version}_${os}_${arch}.tar.gz\"${USING_CLAUSE}"
+              BLOCK+=$'\n'"        sha256 \"${sha}\""
+              BLOCK+=$'\n'"      end"
+            done < <(echo "$PLATFORMS" | jq -c ".[] | select(.brew_os == \"${brew_os}\")")
+
+            BLOCK+=$'\n'"    end"
+          done
+
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "url_block<<$EOF" >> $GITHUB_OUTPUT
+          echo "$BLOCK" >> $GITHUB_OUTPUT
+          echo "$EOF" >> $GITHUB_OUTPUT
+
+          echo "test_block=assert_match version.to_s, shell_output(\"#{bin}/${BINARY} version\")" >> $GITHUB_OUTPUT
+
+      - name: "binary: build URL block"
+        if: inputs.artifact-style == 'binary'
+        id: binary
+        env:
+          USING_CLAUSE: ${{ steps.fragments.outputs.using_clause }}
+        run: |
+          SHA=$(shasum -a 256 "${BINARY}" | awk '{print $1}')
+
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "url_block<<$EOF" >> $GITHUB_OUTPUT
+          cat >> $GITHUB_OUTPUT <<URLBLOCK
+
+            depends_on :macos
+
+            url "https://github.com/${SOURCE_REPO}/releases/download/v#{version}/${BINARY}"${USING_CLAUSE}
+            sha256 "${SHA}"
+          URLBLOCK
+          echo "$EOF" >> $GITHUB_OUTPUT
+
+          echo "test_block=system \"#{bin}/${BINARY}\", \"--version\"" >> $GITHUB_OUTPUT
+
+      - name: Generate formula
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+          REQUIRE_LINE: ${{ steps.fragments.outputs.require_line }}
+          CAVEATS_BLOCK: ${{ steps.fragments.outputs.caveats }}
+          URL_BLOCK: ${{ steps.goreleaser.outputs.url_block || steps.binary.outputs.url_block }}
+          TEST_BLOCK: ${{ steps.goreleaser.outputs.test_block || steps.binary.outputs.test_block }}
+        run: |
+          cat > "tap/Formula/${PACKAGE}.rb" <<FORMULA
+          ${REQUIRE_LINE}
+
+          class ${FORMULA_CLASS} < Formula
+            desc "${FORMULA_DESC}"
+            homepage "https://github.com/${SOURCE_REPO}"
+            version "${VERSION}"
+            license "${LICENSE}"
+          ${URL_BLOCK}
+
+            def install
+              bin.install "${BINARY}"
+            end
+          ${CAVEATS_BLOCK}
+            test do
+              ${TEST_BLOCK}
+            end
+          end
+          FORMULA
+
+          sed -i '/./,$!d' "tap/Formula/${PACKAGE}.rb"
+
+      - name: Commit and push formula
+        run: |
+          cd tap
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git add "Formula/${PACKAGE}.rb"
+
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "${PACKAGE}: update to v${{ steps.version.outputs.version }}"
+            git push
+          fi
