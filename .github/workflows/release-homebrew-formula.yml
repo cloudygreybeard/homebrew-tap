@@ -87,7 +87,7 @@ jobs:
       PLATFORMS: ${{ inputs.platforms }}
     steps:
       - name: Checkout tap repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: ${{ env.TAP_REPO }}
           ssh-key: ${{ secrets.deploy-key }}
