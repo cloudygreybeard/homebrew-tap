@@ -41,6 +41,21 @@ on:
         required: false
         type: string
         default: "Apache-2.0"
+      install-extra:
+        description: "Additional lines for the install block, after bin.install (e.g. man1.install)"
+        required: false
+        type: string
+        default: ""
+      custom-caveats:
+        description: "Custom caveats text for the formula (overrides auto-generated private-repo caveats if set)"
+        required: false
+        type: string
+        default: ""
+      custom-test:
+        description: "Custom test block body (overrides default version-match test if set)"
+        required: false
+        type: string
+        default: ""
       platforms:
         description: "JSON array of platform objects: [{os, arch, brew_os, brew_arch}]. Defaults to standard macOS+Linux matrix."
         required: false
@@ -86,6 +101,10 @@ jobs:
 
       - name: Resolve formula fragments
         id: fragments
+        env:
+          CUSTOM_CAVEATS: ${{ inputs.custom-caveats }}
+          CUSTOM_TEST: ${{ inputs.custom-test }}
+          INSTALL_EXTRA: ${{ inputs.install-extra }}
         run: |
           if [ "$PRIVATE" = "true" ]; then
             echo "require_line=require_relative \"../lib/private_strategy\"" >> $GITHUB_OUTPUT
@@ -94,8 +113,26 @@ jobs:
             echo ',
                     using: GitHubPrivateRepositoryReleaseDownloadStrategy' >> $GITHUB_OUTPUT
             echo "$EOF" >> $GITHUB_OUTPUT
+          else
+            echo "require_line=" >> $GITHUB_OUTPUT
+            echo "using_clause=" >> $GITHUB_OUTPUT
+          fi
+
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          if [ -n "$CUSTOM_CAVEATS" ]; then
             echo "caveats<<$EOF" >> $GITHUB_OUTPUT
-            cat >> $GITHUB_OUTPUT <<'CAVEATS'
+            cat >> $GITHUB_OUTPUT <<CAVEATS_END
+
+            def caveats
+              <<~EOS
+                ${CUSTOM_CAVEATS}
+              EOS
+            end
+          CAVEATS_END
+            echo "$EOF" >> $GITHUB_OUTPUT
+          elif [ "$PRIVATE" = "true" ]; then
+            echo "caveats<<$EOF" >> $GITHUB_OUTPUT
+            cat >> $GITHUB_OUTPUT <<'CAVEATS_END'
 
             def caveats
               <<~EOS
@@ -107,13 +144,13 @@ jobs:
                 Or create a dedicated token at https://github.com/settings/tokens with repo scope.
               EOS
             end
-          CAVEATS
+          CAVEATS_END
             echo "$EOF" >> $GITHUB_OUTPUT
           else
-            echo "require_line=" >> $GITHUB_OUTPUT
-            echo "using_clause=" >> $GITHUB_OUTPUT
             echo "caveats=" >> $GITHUB_OUTPUT
           fi
+
+          echo "install_extra=${INSTALL_EXTRA}" >> $GITHUB_OUTPUT
 
       - name: Download release assets
         env:
@@ -141,6 +178,7 @@ jobs:
         env:
           VERSION: ${{ steps.version.outputs.version }}
           USING_CLAUSE: ${{ steps.fragments.outputs.using_clause }}
+          CUSTOM_TEST: ${{ inputs.custom-test }}
         run: |
           BLOCK=""
 
@@ -167,13 +205,18 @@ jobs:
           echo "$BLOCK" >> $GITHUB_OUTPUT
           echo "$EOF" >> $GITHUB_OUTPUT
 
-          echo "test_block=assert_match version.to_s, shell_output(\"#{bin}/${BINARY} version\")" >> $GITHUB_OUTPUT
+          if [ -n "$CUSTOM_TEST" ]; then
+            echo "test_block=${CUSTOM_TEST}" >> $GITHUB_OUTPUT
+          else
+            echo "test_block=assert_match version.to_s, shell_output(\"#{bin}/${BINARY} version\")" >> $GITHUB_OUTPUT
+          fi
 
       - name: "binary: build URL block"
         if: inputs.artifact-style == 'binary'
         id: binary
         env:
           USING_CLAUSE: ${{ steps.fragments.outputs.using_clause }}
+          CUSTOM_TEST: ${{ inputs.custom-test }}
         run: |
           SHA=$(shasum -a 256 "${BINARY}" | awk '{print $1}')
 
@@ -188,16 +231,26 @@ jobs:
           URLBLOCK
           echo "$EOF" >> $GITHUB_OUTPUT
 
-          echo "test_block=system \"#{bin}/${BINARY}\", \"--version\"" >> $GITHUB_OUTPUT
+          if [ -n "$CUSTOM_TEST" ]; then
+            echo "test_block=${CUSTOM_TEST}" >> $GITHUB_OUTPUT
+          else
+            echo "test_block=system \"#{bin}/${BINARY}\", \"--version\"" >> $GITHUB_OUTPUT
+          fi
 
       - name: Generate formula
         env:
           VERSION: ${{ steps.version.outputs.version }}
           REQUIRE_LINE: ${{ steps.fragments.outputs.require_line }}
           CAVEATS_BLOCK: ${{ steps.fragments.outputs.caveats }}
+          INSTALL_EXTRA: ${{ steps.fragments.outputs.install_extra }}
           URL_BLOCK: ${{ steps.goreleaser.outputs.url_block || steps.binary.outputs.url_block }}
           TEST_BLOCK: ${{ steps.goreleaser.outputs.test_block || steps.binary.outputs.test_block }}
         run: |
+          EXTRA_LINES=""
+          if [ -n "$INSTALL_EXTRA" ]; then
+            EXTRA_LINES=$'\n'"      ${INSTALL_EXTRA}"
+          fi
+
           cat > "tap/Formula/${PACKAGE}.rb" <<FORMULA
           ${REQUIRE_LINE}
 
@@ -209,7 +262,7 @@ jobs:
           ${URL_BLOCK}
 
             def install
-              bin.install "${BINARY}"
+              bin.install "${BINARY}"${EXTRA_LINES}
             end
           ${CAVEATS_BLOCK}
             test do
