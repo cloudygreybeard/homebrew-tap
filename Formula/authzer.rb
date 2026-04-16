@@ -7,21 +7,21 @@ class Authzer < Formula
     on_macos do
       on_intel do
         url "https://github.com/cloudygreybeard/authzer/releases/download/v#{version}/authzer_#{version}_darwin_amd64.tar.gz"
-        sha256 "58c8bdd4a4b717567ba5b5fdeb9d95eb607c92b3649e986fe66748168679da38"
+        sha256 "d5f643c3c214f2711cd6be147183f71795421f99ffc24c2d37c746935f5aad5a"
       end
       on_arm do
         url "https://github.com/cloudygreybeard/authzer/releases/download/v#{version}/authzer_#{version}_darwin_arm64.tar.gz"
-        sha256 "c07fb0911033b740bbe5d20741738f4e9e5eb5ed7e40da87b1ac3052e5010179"
+        sha256 "105b8f41dc4e08fce16f5c0ab6c8f7d3c9002deb81f594167fdb06362d70da05"
       end
     end
     on_linux do
       on_intel do
         url "https://github.com/cloudygreybeard/authzer/releases/download/v#{version}/authzer_#{version}_linux_amd64.tar.gz"
-        sha256 "63355bc5e58180820cc2565b4e5497dd9f3f8b3748e616a7bd0267fbd1565a99"
+        sha256 "1dc1ef611605f131284ceccb39d4010cb986005ad262d680f498bb176f9f8452"
       end
       on_arm do
         url "https://github.com/cloudygreybeard/authzer/releases/download/v#{version}/authzer_#{version}_linux_arm64.tar.gz"
-        sha256 "b060818d5f316fcf4b18732602f5bd4abce8871a7ff20c773b26554ae537d720"
+        sha256 "ddf404829a8a8444182479c992c589434d2964b03629d9e93c0d2917d435d3af"
       end
     end
 
