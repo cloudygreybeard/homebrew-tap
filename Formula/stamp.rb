@@ -1,28 +1,28 @@
 class Stamp < Formula
   desc "Insert timestamps into filenames by renaming or copying"
   homepage "https://github.com/cloudygreybeard/stamp"
-  version "0.1.0"
+  version "0.1.1"
   license "Apache-2.0"
 
   on_macos do
     on_intel do
       url "https://github.com/cloudygreybeard/stamp/releases/download/v#{version}/stamp_#{version}_darwin_amd64.tar.gz"
-      sha256 "dfa15a2bca65db05d381e7d91a0b5acefda029df35223c7987ca900a1da99317"
+      sha256 "16b6f70b1506358cceada137195ac6d01d6932c95d2427a97491ce1a3dc57edc"
     end
     on_arm do
       url "https://github.com/cloudygreybeard/stamp/releases/download/v#{version}/stamp_#{version}_darwin_arm64.tar.gz"
-      sha256 "4873a367fe41726544bde60575768e3a424da2f0715424fe136298107060e08d"
+      sha256 "6fea7b2fba990b22cf8efdf9d80fdfe28555f21348e19bef46db5e040d384871"
     end
   end
 
   on_linux do
     on_intel do
       url "https://github.com/cloudygreybeard/stamp/releases/download/v#{version}/stamp_#{version}_linux_amd64.tar.gz"
-      sha256 "69c201bbcae2a1275872beb542e074afe40754c5bccf5bde21e9fa6d89477cdf"
+      sha256 "eceb08004b9c8aeda75a08ca8bf91263612fc9d4d056230b4b4f8dc8572358a4"
     end
     on_arm do
       url "https://github.com/cloudygreybeard/stamp/releases/download/v#{version}/stamp_#{version}_linux_arm64.tar.gz"
-      sha256 "18febf810cf9d1618cb1ceb43baa806d0232e2840c5467dab834f90a25897807"
+      sha256 "7cc4989393defe404f23df52cf41e58b8afa00947b2f4632bcdc19e04c13a8ff"
     end
   end
 
