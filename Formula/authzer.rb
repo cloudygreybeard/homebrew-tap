@@ -1,27 +1,27 @@
 class Authzer < Formula
   desc "Config-driven web access authz management via CDP"
   homepage "https://github.com/cloudygreybeard/authzer"
-  version "0.4.3"
+  version "0.5.0"
   license "Apache-2.0"
 
     on_macos do
       on_intel do
         url "https://github.com/cloudygreybeard/authzer/releases/download/v#{version}/authzer_#{version}_darwin_amd64.tar.gz"
-        sha256 "97c0b62629f9b1a914b0dea21e9399440924c491db3eb1b98e2406bdbd9db83d"
+        sha256 "9ab36623ee01ae5578258ddd063cc42b8ce8c771bf542e5e39bd876ec204f924"
       end
       on_arm do
         url "https://github.com/cloudygreybeard/authzer/releases/download/v#{version}/authzer_#{version}_darwin_arm64.tar.gz"
-        sha256 "abf0c9f6a0c78b9a9aeb42ab3b718dd43ef0b762e303d6f9892f4c9732367e46"
+        sha256 "0d37c339e0ed10bca7f9d82317e1b6ed8902e77d8098e882302782f923806c80"
       end
     end
     on_linux do
       on_intel do
         url "https://github.com/cloudygreybeard/authzer/releases/download/v#{version}/authzer_#{version}_linux_amd64.tar.gz"
-        sha256 "0eabc39b1cab6ddd65d8ddfae482034155f474d89641277ac240a38a7b65583b"
+        sha256 "97b5a735a5d7f4cd32b12e3f2b3d51350aa7c174b1e9b710a296dc507714c952"
       end
       on_arm do
         url "https://github.com/cloudygreybeard/authzer/releases/download/v#{version}/authzer_#{version}_linux_arm64.tar.gz"
-        sha256 "8afc54fb0ab95afcd50e62d009ab1530f6eb323529f55ba1051d07fc92305889"
+        sha256 "7c75a20c693948c9148e324a291b3da4c73e8cf6bf6a8440bc7b2cbc053b7b9f"
       end
     end
 
